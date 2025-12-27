@@ -1,0 +1,1138 @@
+================================================================================
+                    SMART VILLAGE MART - PROJECT CODE EXPLANATION
+================================================================================
+
+PROJECT OVERVIEW
+================================================================================
+Smart Village Mart is a full-stack e-commerce platform designed to connect 
+local village shopkeepers with customers. The platform enables shopkeepers to 
+list their products online and allows customers to browse, search, and purchase 
+authentic local products.
+
+TECHNOLOGY STACK
+================================================================================
+Frontend:
+- React 18.3.1 with TypeScript
+- Vite (Build tool)
+- React Router DOM (Navigation)
+- Tailwind CSS 4.1.12 (Styling)
+- Radix UI (Component library)
+- Lucide React (Icons)
+- React Helmet Async (SEO)
+- Axios (HTTP client)
+
+Backend:
+- Node.js with Express 5.2.1
+- MySQL 2 (Database)
+- JWT (Authentication)
+- Bcrypt (Password hashing)
+- CORS (Cross-origin requests)
+
+================================================================================
+                            FRONTEND STRUCTURE
+================================================================================
+
+1. ENTRY POINT - main.tsx
+================================================================================
+Location: src/main.tsx
+
+Purpose: Application entry point that renders the root React component
+
+Code Explanation:
+- Imports React's createRoot for React 18+ rendering
+- Imports the main App component
+- Imports global CSS styles
+- Uses createRoot() to render the App into the DOM element with id "root"
+- This is the first file that executes when the app starts
+
+Key Concepts:
+- React 18's concurrent rendering
+- Single Page Application (SPA) initialization
+
+
+2. ROOT COMPONENT - App.tsx
+================================================================================
+Location: src/app/App.tsx
+
+Purpose: Main application component that sets up routing and authentication
+
+Code Explanation:
+
+A. Provider Hierarchy:
+   - HelmetProvider: Enables dynamic meta tag management for SEO
+   - AuthProvider: Provides authentication context throughout the app
+   - BrowserRouter: Enables client-side routing
+
+B. ProtectedRoute Component:
+   - Custom component to protect routes that require authentication
+   - Checks if user is logged in
+   - Verifies user role matches required role
+   - Shows loading spinner while checking auth status
+   - Redirects to home if unauthorized
+
+C. Routes Configuration:
+   Public Routes:
+   - / : Homepage
+   - /products : All products listing
+   - /product/:id : Individual product details
+   - /category/:category : Products by category
+   - /shop/:id : Individual shop page
+   - /about : About page
+   - /contact : Contact page
+   - /chatbot : Chat support
+   - /customer-login : Customer login
+   - /shopkeeper-login : Shopkeeper login
+   - /admin-login : Admin login
+
+   Protected Routes:
+   - /profile : User profile (any authenticated user)
+   - /customer/dashboard : Customer dashboard (customers only)
+   - /shopkeeper/dashboard : Shopkeeper dashboard (shopkeepers only)
+   - /shopkeeper/analytics : Shopkeeper analytics (shopkeepers only)
+   - /admin/dashboard : Admin dashboard (admins only)
+
+
+3. AUTHENTICATION CONTEXT - AuthContext.tsx
+================================================================================
+Location: src/contexts/AuthContext.tsx
+
+Purpose: Manages user authentication state across the entire application
+
+Code Explanation:
+
+A. State Management:
+   - user: Stores current user information (id, name, email, role)
+   - loading: Tracks authentication check status
+   - isAuthenticated: Boolean flag for login status
+
+B. Key Functions:
+
+   login(email, password, role):
+   - Sends POST request to backend with credentials
+   - Receives JWT token and user data
+   - Stores token in localStorage
+   - Updates user state
+   - Returns success/error
+
+   logout():
+   - Removes token from localStorage
+   - Clears user state
+   - Redirects to home page
+
+   checkAuth():
+   - Runs on app initialization
+   - Checks if token exists in localStorage
+   - Validates token with backend
+   - Restores user session if valid
+
+C. Context Provider:
+   - Wraps entire app to provide auth state and functions
+   - Available to all components via useAuth() hook
+
+
+4. HOMEPAGE - Homepage.tsx
+================================================================================
+Location: src/app/pages/Homepage.tsx
+
+Purpose: Main landing page showcasing platform features and products
+
+Code Explanation:
+
+A. SEO Implementation:
+   - SEOHead component with meta tags
+   - LocalBusiness structured data (JSON-LD)
+   - Keywords for search engines
+   - Open Graph tags for social sharing
+
+B. Hero Section:
+   - Full-screen video background
+   - Dark overlay for text readability
+   - Responsive text sizing (3xl mobile → 6xl desktop)
+   - Two CTA buttons:
+     * "Find Products Near Me" - Primary action
+     * "Join as Shopkeeper" - Secondary action with outline style
+   - Buttons stack vertically on mobile, horizontal on desktop
+
+C. Stats Section:
+   - Displays platform statistics
+   - Grid layout: 2 columns mobile → 4 columns desktop
+   - Icons with colored backgrounds
+   - Shows: Local Shops, Products, Customers, Satisfaction rate
+
+D. Categories Section:
+   - Browse by category cards
+   - Grid: 2 columns mobile → 3 tablet → 4 desktop
+   - Each card has:
+     * Emoji icon in colored circle
+     * Category name
+     * Hover effects (shadow, translate)
+   - Links to category-specific pages
+
+E. Featured Products:
+   - Fetches first 4 products from API
+   - Grid: 1 column mobile → 2 tablet → 4 desktop
+   - Product cards show:
+     * Product image
+     * Product name
+     * Shop name
+     * Price
+   - Hover effects on images (scale)
+   - Loading state with spinner
+   - Empty state message
+
+F. About Section:
+   - Brief company description
+   - Two-column layout (text + images)
+   - Images in grid with offset
+   - CTA button to full About page
+
+G. Responsive Design:
+   - Mobile-first approach
+   - Breakpoints: sm (640px), md (768px), lg (1024px)
+   - Flexible spacing and padding
+   - Touch-friendly button sizes
+
+
+5. PRODUCTS PAGE - ProductsPage.tsx
+================================================================================
+Location: src/app/pages/ProductsPage.tsx
+
+Purpose: Display all products with filtering and sorting capabilities
+
+Code Explanation:
+
+A. State Management:
+   - products: Array of all products
+   - searchQuery: User's search input
+   - categoryFilter: Selected category filter
+   - sortBy: Selected sort option
+   - loading: Loading state
+
+B. Filter Section:
+   Three filter controls:
+   
+   1. Search:
+      - Text input with search icon
+      - Filters products by name (case-insensitive)
+   
+   2. Category Dropdown:
+      - Select component from Radix UI
+      - Options: All, Groceries, Electronics, Agricultural, etc.
+      - Filters products by category
+   
+   3. Sort Dropdown:
+      - Options: Name, Price (Low to High), Price (High to Low)
+      - Sorts filtered results
+
+C. Filtering Logic:
+   - Combines search and category filters
+   - Uses .filter() to match both conditions
+   - Then applies sorting with .sort()
+   - All filtering happens client-side for performance
+
+D. Product Grid:
+   - Responsive grid: 1 col mobile → 2 tablet → 3-4 desktop
+   - Each product card:
+     * Image with hover zoom effect
+     * Product name
+     * Shop name
+     * Price in rupees
+   - Links to product detail page
+
+E. SEO:
+   - Page-specific meta tags
+   - Keywords for product discovery
+   - Descriptive alt tags on images
+
+
+6. ABOUT PAGE - AboutPage.tsx
+================================================================================
+Location: src/app/pages/AboutPage.tsx
+
+Purpose: Company information, mission, vision, and values
+
+Code Explanation:
+
+A. Hero Section:
+   - Gradient background (emerald-600 to emerald-800)
+   - Centered title and description
+   - Responsive text sizing
+
+B. Mission & Vision Cards:
+   - Two-column grid on desktop
+   - Stacks on mobile
+   - Icon + heading + description
+   - White cards with padding
+
+C. Our Story Section:
+   - Narrative about company founding
+   - Maximum width for readability
+   - Multiple paragraphs with spacing
+
+D. Values Section:
+   - Three value cards:
+     * Community First
+     * Quality & Authenticity
+     * Sustainable Growth
+   - Each with icon, title, description
+   - Grid: 1 col mobile → 3 desktop
+
+E. Impact Statistics:
+   - Four metrics displayed
+   - Grid: 2 cols mobile → 4 desktop
+   - Large numbers with labels
+   - Shows platform growth
+
+F. Responsive Design:
+   - All sections adapt to screen size
+   - Proper spacing on mobile
+   - Icons scale appropriately
+
+
+7. CONTACT PAGE - ContactPage.tsx
+================================================================================
+Location: src/app/pages/ContactPage.tsx
+
+Purpose: Contact information and inquiry form
+
+Code Explanation:
+
+A. Contact Info Cards:
+   - Three cards showing:
+     * Address with MapPin icon
+     * Phone with Phone icon
+     * Email with Mail icon
+   - Grid: 1 col mobile → 2 tablet → 3 desktop
+
+B. Contact Form:
+   - Form fields:
+     * Name (required)
+     * Email (required, type="email")
+     * Subject (required)
+     * Message (required, textarea)
+   - Submit button
+   - Form validation with HTML5
+   - Success toast on submission
+   - Form reset after submission
+
+C. Business Hours Card:
+   - Shows operating hours
+   - Monday-Friday, Saturday, Sunday
+   - Formatted with flex layout
+
+D. FAQs Section:
+   - Common questions and answers
+   - Helps reduce support inquiries
+   - Questions about:
+     * Becoming a seller
+     * Delivery time
+     * Return policy
+
+E. Form Handling:
+   - Uses React state for form data
+   - Controlled components
+   - Toast notification for feedback
+   - Currently shows success message (backend integration pending)
+
+
+8. HEADER COMPONENT - Header.tsx
+================================================================================
+Location: src/app/components/Header.tsx
+
+Purpose: Main navigation bar with authentication and notifications
+
+Code Explanation:
+
+A. Navigation Structure:
+   - Sticky header (stays at top when scrolling)
+   - Backdrop blur effect (bg-white/90)
+   - Logo on left
+   - Nav links in center
+   - Auth/user menu on right
+
+B. Navigation Links:
+   - Home, Products, About Us, Contact, Chat Support
+   - Active link highlighting (emerald color)
+   - Uses NavLink for active state detection
+
+C. Search Bar:
+   - Input field with search icon
+   - Placeholder text
+   - Desktop only (hidden on mobile)
+
+D. Authentication Section:
+   
+   When NOT logged in:
+   - "Customer Login" button (ghost variant)
+   - "Become a Seller" button (primary)
+   
+   When logged in:
+   - NotificationsDropdown component
+   - User menu dropdown with:
+     * Dashboard link (role-specific)
+     * My Profile link
+     * Logout button
+
+E. Mobile Menu:
+   - Hamburger icon (Menu/X toggle)
+   - Slides down when opened
+   - Shows all nav links
+   - Shows auth buttons or user menu
+   - Closes when link is clicked
+
+F. Responsive Design:
+   - Desktop nav hidden on mobile (md:flex)
+   - Mobile menu shown on small screens
+   - Proper spacing and touch targets
+
+
+9. NOTIFICATIONS DROPDOWN - NotificationsDropdown.tsx
+================================================================================
+Location: src/app/components/NotificationsDropdown.tsx
+
+Purpose: Display user notifications in a dropdown panel
+
+Code Explanation:
+
+A. State Management:
+   - notifications: Array of notification objects
+   - unreadCount: Number of unread notifications
+   - loading: Loading state
+   - open: Dropdown open/close state
+
+B. Notification Fetching:
+   - Fetches on component mount
+   - Auto-refreshes every 30 seconds
+   - API call: GET /notifications?user_id=X&user_role=Y
+   - Calculates unread count from response
+
+C. Dropdown Design:
+   - Full height sidebar (100vh - navbar - gap)
+   - Width: 30% of viewport (min 320px, max 400px)
+   - Positioned from left side
+   - Rounded left corners
+   - Smooth slide-in animation (300ms)
+
+D. Header Section:
+   - Gradient background (emerald-500 to emerald-600)
+   - Shows "Notifications" title
+   - Displays unread count
+   - Bell icon
+
+E. Notification Items:
+   Each notification shows:
+   - Bell icon in colored circle
+   - Title (bold)
+   - Message (truncated to 2 lines)
+   - Time ago (e.g., "5m ago", "2h ago")
+   - Unread indicator (pulsing dot)
+   - Gradient background for unread
+   - White background for read
+
+F. Interactions:
+   - Click to mark as read
+   - Click to navigate (if has link)
+   - Hover effects (shadow, background)
+
+G. Empty State:
+   - Shows when no notifications
+   - Large bell icon
+   - Friendly message
+   - Centered layout
+
+H. Time Formatting:
+   - timeAgo() function converts timestamps
+   - Shows: "Just now", "5m ago", "2h ago", "3d ago"
+
+
+10. USER MENU DROPDOWN - Header.tsx (User Menu Section)
+================================================================================
+Location: src/app/components/Header.tsx (lines 101-145)
+
+Purpose: User account menu with profile and logout options
+
+Code Explanation:
+
+A. Dropdown Design:
+   - Same styling as notifications dropdown
+   - Full height sidebar
+   - 30% viewport width
+   - Left-side positioning
+   - Smooth animations
+
+B. Header Section:
+   - Gradient background
+   - User avatar (circular with icon)
+   - User name display
+   - User role (capitalized)
+
+C. Menu Items:
+
+   1. Dashboard:
+      - Icon: Store (emerald background)
+      - Links to role-specific dashboard
+      - Description: "View your dashboard"
+   
+   2. My Profile:
+      - Icon: User (blue background)
+      - Links to /profile
+      - Description: "Manage your account"
+   
+   3. Logout:
+      - Icon: LogOut (red background)
+      - Calls logout function
+      - Description: "Sign out of your account"
+      - Separated by divider line
+
+D. Styling:
+   - Each item has icon in colored circle
+   - Two-line labels (title + description)
+   - Rounded corners
+   - Hover effects (background color change)
+   - Smooth transitions
+
+
+11. FOOTER COMPONENT - Footer.tsx
+================================================================================
+Location: src/app/components/Footer.tsx
+
+Purpose: Site footer with links and information
+
+Code Explanation:
+
+A. Layout:
+   - Dark background (gray-900)
+   - White text
+   - Grid: 1 col mobile → 2 tablet → 4 desktop
+
+B. Sections:
+
+   1. About Section:
+      - Logo with Store icon
+      - Company name
+      - Brief description
+
+   2. Quick Links:
+      - About Us
+      - Products
+      - Contact
+      - Become a Seller
+      - Hover effects (emerald color)
+
+   3. Categories:
+      - Groceries
+      - Electronics
+      - Agricultural
+      - Fashion
+      - Links to category pages
+
+   4. Contact Info:
+      - Address with MapPin icon
+      - Phone with Phone icon
+      - Email with Mail icon
+      - Social media icons (Facebook, Twitter, Instagram)
+
+C. Bottom Bar:
+   - Copyright notice
+   - Centered text
+   - Border separator
+
+D. Responsive Design:
+   - Stacks on mobile
+   - 2 columns on tablet
+   - 4 columns on desktop
+   - Touch-friendly social icons (44px)
+
+
+12. SEO HEAD COMPONENT - SEOHead.tsx
+================================================================================
+Location: src/app/components/SEOHead.tsx
+
+Purpose: Dynamic meta tags for SEO optimization
+
+Code Explanation:
+
+A. Props:
+   - title: Page title
+   - description: Meta description
+   - keywords: SEO keywords (optional)
+   - ogImage: Open Graph image (optional)
+   - ogUrl: Canonical URL (optional)
+   - noIndex: Prevent indexing (optional)
+   - structuredData: JSON-LD data (optional)
+
+B. Meta Tags Generated:
+
+   1. Basic:
+      - <title>: Page title with site branding
+      - <meta name="description">
+      - <meta name="keywords">
+   
+   2. Robots:
+      - noindex/nofollow if specified
+   
+   3. Open Graph (Facebook):
+      - og:type, og:title, og:description
+      - og:image, og:url, og:site_name
+   
+   4. Twitter Card:
+      - twitter:card, twitter:title
+      - twitter:description, twitter:image
+   
+   5. Canonical URL:
+      - <link rel="canonical">
+   
+   6. Structured Data:
+      - JSON-LD script tag
+      - Schema.org markup
+
+C. Usage:
+   - Import in each page component
+   - Pass page-specific data
+   - Helmet updates <head> dynamically
+
+
+13. UI COMPONENTS - button.tsx
+================================================================================
+Location: src/app/components/ui/button.tsx
+
+Purpose: Reusable button component with variants
+
+Code Explanation:
+
+A. Variants:
+   - default: Primary emerald button
+   - destructive: Red button for dangerous actions
+   - outline: Bordered button
+   - secondary: Gray button
+   - ghost: Transparent button
+   - link: Text link style
+
+B. Sizes:
+   - default: Standard height (h-9)
+   - sm: Small (h-8)
+   - lg: Large (h-10)
+   - icon: Square icon button (size-9)
+
+C. Features:
+   - asChild prop: Renders as child element (for Link components)
+   - Disabled state styling
+   - Focus visible ring
+   - Hover effects
+   - Icon support with proper sizing
+
+D. Implementation:
+   - Uses React.forwardRef for ref forwarding
+   - Uses class-variance-authority for variant management
+   - Uses Radix UI Slot for composition
+   - Fully typed with TypeScript
+
+
+14. UI COMPONENTS - dropdown-menu.tsx
+================================================================================
+Location: src/app/components/ui/dropdown-menu.tsx
+
+Purpose: Dropdown menu component with animations
+
+Code Explanation:
+
+A. Components:
+   - DropdownMenu: Root container
+   - DropdownMenuTrigger: Button that opens menu
+   - DropdownMenuContent: Menu panel
+   - DropdownMenuItem: Individual menu item
+   - DropdownMenuSeparator: Divider line
+   - DropdownMenuLabel: Section label
+
+B. Animations:
+   - Slide in from left (slide-in-from-left-4)
+   - Fade in/out
+   - 300ms open duration
+   - 200ms close duration
+   - Ease-in-out timing
+
+C. Styling:
+   - Backdrop blur effect
+   - Semi-transparent background (bg-white/98)
+   - Rounded corners (rounded-xl)
+   - Shadow (shadow-2xl)
+   - Custom positioning support
+
+D. Features:
+   - Keyboard navigation
+   - Focus management
+   - Accessible (ARIA attributes)
+   - Portal rendering (renders outside parent)
+
+
+================================================================================
+                            BACKEND STRUCTURE
+================================================================================
+
+15. SERVER - server.js
+================================================================================
+Location: backend/server.js
+
+Purpose: Express server setup and API routes
+
+Code Explanation:
+
+A. Dependencies:
+   - express: Web framework
+   - mysql2: Database connection
+   - cors: Cross-origin requests
+   - bcryptjs: Password hashing
+   - jsonwebtoken: JWT authentication
+   - dotenv: Environment variables
+
+B. Middleware:
+   - express.json(): Parse JSON bodies
+   - cors(): Enable CORS
+   - express.static(): Serve uploaded files
+
+C. Database Connection:
+   - MySQL connection pool
+   - Configuration from .env file
+   - Connection error handling
+
+D. API Endpoints:
+
+   Authentication:
+   - POST /api/auth/customer/login
+   - POST /api/auth/shopkeeper/login
+   - POST /api/auth/admin/login
+   - POST /api/auth/customer/register
+   - POST /api/auth/shopkeeper/register
+   - GET /api/auth/verify (verify JWT token)
+
+   Products:
+   - GET /api/products (all products)
+   - GET /api/products/:id (single product)
+   - POST /api/products (create product)
+   - PUT /api/products/:id (update product)
+   - DELETE /api/products/:id (delete product)
+
+   Shops:
+   - GET /api/shops (all shops)
+   - GET /api/shops/:id (single shop)
+
+   Notifications:
+   - GET /api/notifications (user notifications)
+   - PUT /api/notifications/:id/read (mark as read)
+
+   Orders:
+   - POST /api/orders (create order)
+   - GET /api/orders/customer/:id (customer orders)
+   - GET /api/orders/shopkeeper/:id (shopkeeper orders)
+
+E. Authentication Middleware:
+   - Verifies JWT token
+   - Extracts user from token
+   - Attaches user to request object
+   - Returns 401 if invalid
+
+
+16. DATABASE SCHEMA
+================================================================================
+Location: backend/database.sql
+
+Tables:
+
+A. users:
+   - id (PRIMARY KEY, AUTO_INCREMENT)
+   - name (VARCHAR)
+   - email (VARCHAR, UNIQUE)
+   - password (VARCHAR, hashed)
+   - role (ENUM: 'customer', 'shopkeeper', 'admin')
+   - created_at (TIMESTAMP)
+
+B. shops:
+   - id (PRIMARY KEY)
+   - shopkeeper_id (FOREIGN KEY → users.id)
+   - name (VARCHAR)
+   - description (TEXT)
+   - address (TEXT)
+   - phone (VARCHAR)
+   - created_at (TIMESTAMP)
+
+C. products:
+   - id (PRIMARY KEY)
+   - shop_id (FOREIGN KEY → shops.id)
+   - name (VARCHAR)
+   - description (TEXT)
+   - price (DECIMAL)
+   - category (VARCHAR)
+   - image (VARCHAR, file path)
+   - stock (INT)
+   - created_at (TIMESTAMP)
+
+D. orders:
+   - id (PRIMARY KEY)
+   - customer_id (FOREIGN KEY → users.id)
+   - shop_id (FOREIGN KEY → shops.id)
+   - total_amount (DECIMAL)
+   - status (ENUM: 'pending', 'confirmed', 'delivered', 'cancelled')
+   - created_at (TIMESTAMP)
+
+E. order_items:
+   - id (PRIMARY KEY)
+   - order_id (FOREIGN KEY → orders.id)
+   - product_id (FOREIGN KEY → products.id)
+   - quantity (INT)
+   - price (DECIMAL)
+
+F. notifications:
+   - id (PRIMARY KEY)
+   - user_id (FOREIGN KEY → users.id)
+   - user_role (VARCHAR)
+   - type (VARCHAR)
+   - title (VARCHAR)
+   - message (TEXT)
+   - link (VARCHAR, nullable)
+   - is_read (BOOLEAN, default FALSE)
+   - created_at (TIMESTAMP)
+
+
+================================================================================
+                        KEY FEATURES EXPLANATION
+================================================================================
+
+17. AUTHENTICATION FLOW
+================================================================================
+
+A. Login Process:
+   1. User enters email and password
+   2. Frontend sends POST request to /api/auth/{role}/login
+   3. Backend queries database for user
+   4. Backend compares password hash with bcrypt
+   5. If valid, backend generates JWT token
+   6. Token contains: user id, email, role
+   7. Frontend stores token in localStorage
+   8. Frontend updates AuthContext state
+   9. User is redirected to dashboard
+
+B. Protected Routes:
+   1. User tries to access protected route
+   2. ProtectedRoute component checks AuthContext
+   3. If not authenticated, redirect to home
+   4. If authenticated but wrong role, redirect to home
+   5. If authorized, render the component
+
+C. Token Verification:
+   1. On app load, checkAuth() runs
+   2. Checks if token exists in localStorage
+   3. Sends token to /api/auth/verify
+   4. Backend verifies JWT signature
+   5. If valid, returns user data
+   6. Frontend restores user session
+   7. If invalid, clears localStorage
+
+D. Logout Process:
+   1. User clicks logout
+   2. Frontend removes token from localStorage
+   3. Frontend clears AuthContext state
+   4. User redirected to home page
+
+
+18. RESPONSIVE DESIGN IMPLEMENTATION
+================================================================================
+
+A. Breakpoints:
+   - Mobile: < 640px (default)
+   - Small: 640px+ (sm:)
+   - Medium: 768px+ (md:)
+   - Large: 1024px+ (lg:)
+   - Extra Large: 1280px+ (xl:)
+
+B. Techniques Used:
+
+   1. Flexible Grids:
+      - grid-cols-1 (mobile)
+      - sm:grid-cols-2 (tablet)
+      - md:grid-cols-3 (desktop)
+      - lg:grid-cols-4 (large desktop)
+
+   2. Responsive Text:
+      - text-3xl (mobile)
+      - sm:text-4xl (small screens)
+      - md:text-5xl (medium screens)
+      - lg:text-6xl (large screens)
+
+   3. Responsive Spacing:
+      - p-4 (mobile)
+      - sm:p-6 (small screens)
+      - md:p-8 (medium screens)
+
+   4. Conditional Display:
+      - hidden md:flex (hide on mobile, show on desktop)
+      - md:hidden (show on mobile, hide on desktop)
+
+   5. Responsive Width:
+      - w-full (mobile)
+      - sm:w-auto (desktop)
+
+C. Mobile-First Approach:
+   - Base styles target mobile
+   - Add complexity for larger screens
+   - Progressive enhancement
+
+
+19. SEO OPTIMIZATION
+================================================================================
+
+A. Meta Tags:
+   - Unique title for each page
+   - Descriptive meta descriptions
+   - Relevant keywords
+   - Author information
+
+B. Open Graph:
+   - og:title, og:description
+   - og:image for social sharing
+   - og:url for canonical URL
+   - og:type (website)
+
+C. Structured Data:
+   - JSON-LD format
+   - LocalBusiness schema
+   - Product schema (for product pages)
+   - Organization schema
+
+D. Semantic HTML:
+   - <header>, <nav>, <main>
+   - <section>, <article>
+   - <footer>
+   - Proper heading hierarchy (h1 → h6)
+
+E. Image Optimization:
+   - Descriptive alt tags
+   - Proper file names
+   - Lazy loading (native)
+
+F. Performance:
+   - Code splitting
+   - Lazy loading components
+   - Optimized images
+   - Minified CSS/JS
+
+
+20. STATE MANAGEMENT
+================================================================================
+
+A. React Context:
+   - AuthContext for authentication
+   - Provides user state globally
+   - Avoids prop drilling
+
+B. Component State:
+   - useState for local state
+   - Form inputs
+   - UI toggles (dropdowns, modals)
+   - Loading states
+
+C. Data Fetching:
+   - useEffect for API calls
+   - Loading states
+   - Error handling
+   - Data caching (in state)
+
+
+================================================================================
+                        DEVELOPMENT WORKFLOW
+================================================================================
+
+21. RUNNING THE PROJECT
+================================================================================
+
+A. Backend Setup:
+   1. Navigate to backend folder: cd backend
+   2. Install dependencies: npm install
+   3. Create .env file with:
+      - DB_HOST=localhost
+      - DB_USER=root
+      - DB_PASSWORD=your_password
+      - DB_NAME=smart_village_mart
+      - JWT_SECRET=your_secret_key
+   4. Import database.sql into MySQL
+   5. Start server: node server.js
+   6. Server runs on http://localhost:5000
+
+B. Frontend Setup:
+   1. Navigate to project root
+   2. Install dependencies: npm install
+   3. Start dev server: npm run dev
+   4. App runs on http://localhost:5173
+
+C. Building for Production:
+   1. Run: npm run build
+   2. Output in dist/ folder
+   3. Deploy dist/ to hosting service
+
+
+22. FILE UPLOAD SYSTEM
+================================================================================
+
+A. Product Images:
+   - Stored in backend/uploads/products/
+   - Multer middleware handles uploads
+   - File validation (type, size)
+   - Unique filename generation
+   - Path stored in database
+
+B. Image Display:
+   - Backend serves static files
+   - Frontend requests: http://localhost:5000/uploads/products/filename.jpg
+   - Fallback to placeholder if no image
+
+
+23. SECURITY MEASURES
+================================================================================
+
+A. Password Security:
+   - Bcrypt hashing (10 rounds)
+   - Never store plain text passwords
+   - Salt automatically generated
+
+B. JWT Authentication:
+   - Signed tokens
+   - Expiration time (24 hours)
+   - Secret key from environment
+
+C. Input Validation:
+   - Frontend: HTML5 validation
+   - Backend: Data sanitization
+   - SQL injection prevention (parameterized queries)
+
+D. CORS:
+   - Configured allowed origins
+   - Credentials support
+   - Preflight requests handled
+
+
+================================================================================
+                        FUTURE ENHANCEMENTS
+================================================================================
+
+24. PLANNED FEATURES
+================================================================================
+
+A. Payment Integration:
+   - Razorpay/Stripe integration
+   - Order payment processing
+   - Payment history
+
+B. Real-time Chat:
+   - Socket.io integration
+   - Customer-shopkeeper messaging
+   - Typing indicators
+
+C. Advanced Search:
+   - Elasticsearch integration
+   - Autocomplete
+   - Filters (price range, rating)
+
+D. Reviews & Ratings:
+   - Product reviews
+   - Shop ratings
+   - Review moderation
+
+E. Analytics Dashboard:
+   - Sales charts
+   - Revenue tracking
+   - Customer insights
+
+F. Mobile App:
+   - React Native version
+   - Push notifications
+   - Offline support
+
+
+================================================================================
+                        TROUBLESHOOTING
+================================================================================
+
+25. COMMON ISSUES
+================================================================================
+
+A. Database Connection Error:
+   - Check MySQL is running
+   - Verify .env credentials
+   - Check database exists
+
+B. CORS Error:
+   - Verify backend CORS configuration
+   - Check frontend API URL
+   - Ensure credentials: true
+
+C. Authentication Issues:
+   - Check JWT secret matches
+   - Verify token in localStorage
+   - Check token expiration
+
+D. Image Upload Fails:
+   - Check uploads folder exists
+   - Verify folder permissions
+   - Check file size limits
+
+E. Build Errors:
+   - Clear node_modules
+   - Delete package-lock.json
+   - Run npm install again
+
+
+================================================================================
+                        PROJECT STRUCTURE SUMMARY
+================================================================================
+
+smart-village-mart/
+├── backend/
+│   ├── server.js              # Express server
+│   ├── database.sql           # Database schema
+│   ├── uploads/               # Uploaded files
+│   └── package.json           # Backend dependencies
+│
+├── src/
+│   ├── main.tsx               # Entry point
+│   ├── app/
+│   │   ├── App.tsx            # Root component
+│   │   ├── components/        # Reusable components
+│   │   │   ├── Header.tsx
+│   │   │   ├── Footer.tsx
+│   │   │   ├── SEOHead.tsx
+│   │   │   ├── NotificationsDropdown.tsx
+│   │   │   └── ui/            # UI components
+│   │   │       ├── button.tsx
+│   │   │       ├── dropdown-menu.tsx
+│   │   │       └── ...
+│   │   └── pages/             # Page components
+│   │       ├── Homepage.tsx
+│   │       ├── ProductsPage.tsx
+│   │       ├── AboutPage.tsx
+│   │       ├── ContactPage.tsx
+│   │       └── ...
+│   ├── contexts/
+│   │   └── AuthContext.tsx    # Authentication context
+│   ├── lib/
+│   │   └── api.ts             # Axios configuration
+│   └── styles/
+│       └── index.css          # Global styles
+│
+├── public/
+│   ├── logo/                  # Logo files
+│   └── videos/                # Video files
+│
+├── index.html                 # HTML template
+├── package.json               # Frontend dependencies
+├── vite.config.ts             # Vite configuration
+└── tailwind.config.js         # Tailwind configuration
+
+
+================================================================================
+                        END OF DOCUMENTATION
+================================================================================
+
+This documentation covers the entire Smart Village Mart project codebase.
+For specific implementation details, refer to the individual source files.
+
+Last Updated: December 20, 2024
+Version: 1.0.0

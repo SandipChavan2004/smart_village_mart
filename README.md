@@ -190,10 +190,10 @@ smart_village_mart/
 ---
 
 ## 👨‍💻 Authors (Group Project)
-** Pranav Chavan
-** Sandip Chavan
-** Ganesh Bachate
-** Aniket Chandanshive
+- Pranav Chavan
+- Sandip Chavan
+- Ganesh Bachate
+- Aniket Chandanshive
 
 - GitHub: [@SandipChavan2004](https://github.com/SandipChavan2004)
 

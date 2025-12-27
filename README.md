@@ -181,7 +181,6 @@ smart_village_mart/
 
 ## 🚧 Roadmap
 
-- [ ] Payment gateway integration
 - [ ] Multi-language support
 - [ ] Mobile app (React Native)
 - [ ] Email notifications
@@ -190,12 +189,13 @@ smart_village_mart/
 
 ---
 
-## 👨‍💻 Author
-
+## 👨‍💻 Authors (Group Project)
+**Pranav Chavan**
 **Sandip Chavan**
+**Ganesh Bachate**
+**Aniket Chandanshive**
 
 - GitHub: [@SandipChavan2004](https://github.com/SandipChavan2004)
-- Email: sandipchavan2004@example.com
 
 ---
 
